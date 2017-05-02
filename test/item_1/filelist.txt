@@ -1,0 +1,2 @@
+./test/item_1/filelist.txt
+./test/item_1/item_metadata.json
