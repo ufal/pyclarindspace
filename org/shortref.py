@@ -20,4 +20,3 @@ class Shortref(object):
                                                                             'handle'], target_url))
         logging.debug(pformat(shortref_object))
         return shortref_object['handle']
-

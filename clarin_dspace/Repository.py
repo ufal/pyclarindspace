@@ -6,7 +6,7 @@ from clarin_dspace.content.Community import Community
 
 class Repository(object):
     """Represent and access repository content"""
- 
+
     def __init__(self, base_url):
         """Constructor for Repository
         base_url: The repository url up to /rest or /xmlui
@@ -18,7 +18,8 @@ class Repository(object):
 
     def login(self, email, password):
         """Obtain access token for user with provided email and password"""
-        r = requests.post(self.get_api_url() + '/login', json={'email': email, 'password': password})
+        r = requests.post(self.get_api_url() + '/login', json={'email': email,
+                                                               'password': password})
         logging.debug(pformat(r))
         r.raise_for_status()
         logging.info("User successfully logged in")
@@ -33,7 +34,7 @@ class Repository(object):
         return r.json()
 
     def find_community_by_name(self, community_name):
-        """Fetch all communities and do exact match on the name. 
+        """Fetch all communities and do exact match on the name.
         Return Community object"""
         url = self.get_api_url() + '/communities'
         r = requests.get(url, headers=self.get_request_headers())
@@ -67,7 +68,6 @@ class Repository(object):
         logging.debug(pformat(r))
         r.raise_for_status()
         logging.info("User successfully logged out")
-
 
     def get_request_headers(self):
         return self.request_headers

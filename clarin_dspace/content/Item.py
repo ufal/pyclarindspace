@@ -34,7 +34,7 @@ class Item(object):
         logging.debug(pformat(bitstream))
 
     def replace_metadata_field(self, json_metadata_entry_array):
-        """MetadataEntry is {key, value, lang} object. PUT clears all the values mapped to the 
+        """MetadataEntry is {key, value, lang} object. PUT clears all the values mapped to the
         key in item and adds those from the MetadataEntry."""
         url = self.get_api_url() + '/items/' + str(self.id) + '/metadata'
         r = requests.put(url, json=json_metadata_entry_array, headers=self.get_request_headers())
@@ -44,7 +44,8 @@ class Item(object):
 
     def update_identifier(self, handle):
         """Replace all dc.identifier.uri with the supplied handle"""
-        self.replace_metadata_field([{'key': 'dc.identifier.uri', 'value': handle, 'language': None}])
+        self.replace_metadata_field([{'key': 'dc.identifier.uri', 'value': handle,
+                                      'language': None}])
 
     def get_request_headers(self):
         return self.parent.get_request_headers()

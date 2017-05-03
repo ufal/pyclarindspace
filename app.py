@@ -8,7 +8,7 @@ from org.shortref import Shortref
 
 
 REPO_URL = os.environ.get('REPO_URL')
-#Use admin account a) creating com & col b) no hassle with user rights mgmt
+# Use admin account a) creating com & col b) no hassle with user rights mgmt
 ADMIN_EMAIL = os.environ.get('EMAIL')
 ADMIN_PASS = os.environ.get('PASSWORD')
 
@@ -62,6 +62,3 @@ if __name__ == '__main__':
         my_item.update_identifier(handle)
 
     repository.logout()
-
-
-
