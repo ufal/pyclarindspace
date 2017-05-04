@@ -1,18 +1,17 @@
 # coding=utf-8
+import clarindspace
 from setuptools import setup
 from os import path
 
-__this_dir = path.abspath(path.dirname(__file__))
-
 setup(
-    name='clarindspace',
-    version='0.1.0',
+    name=clarindspace.__title__,
+    version=clarindspace.__version__,
     description='clarin-dspace REST API examples',
     long_description='clarin-dspace REST API examples',
     url='https://github.com/vidiecan/pyclarindspace',
     author='CLARIN/LINDAT',
     author_email='lindat-technical@ufal.mff.cuni.cz',
-    license='MIT',
+    license=clarindspace.__license__,
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
@@ -20,8 +19,6 @@ setup(
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
     ],
-    # You can just specify the packages manually here if your project is
-    # simple. Or you can use find_packages().
     packages=['clarindspace'],
     install_requires=['requests', 'requests_toolbelt'],
 )
