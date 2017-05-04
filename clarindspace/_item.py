@@ -1,8 +1,8 @@
 # coding=utf-8
-from requests_toolbelt.multipart.encoder import MultipartEncoder
-import logging
-from pprint import pformat
 import os
+import logging
+from requests_toolbelt.multipart.encoder import MultipartEncoder
+from pprint import pformat
 
 
 class item(object):

@@ -7,7 +7,7 @@ _logger = logging.getLogger("clarindspace")
 
 
 class repository(object):
-    """ 
+    """
         Represent and access repository content
     """
 
@@ -73,7 +73,7 @@ class repository(object):
 
     def find_community_by_name(self, name):
         """
-            Fetch all communities and do exact match on the name.   
+            Fetch all communities and do exact match on the name.
             Return `community` object
         """
         js = self.api_get('/communities')

@@ -1,7 +1,7 @@
 # coding=utf-8
 import logging
-from pprint import pformat
 import requests
+from pprint import pformat
 
 
 class handle(object):
@@ -12,7 +12,7 @@ class handle(object):
 
     @staticmethod
     def mint(target_url, title, reportemail, subprefix):
-        """ 
+        """
             Register the target_url with shortref and return the handle
         """
         response = requests.post(
