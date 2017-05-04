@@ -1,11 +1,14 @@
 language: python
 python:
+  - "2.7"
   - "3.5"
-  - "nightly"
-# command to install dependencies
+
 install: "pip install -r requirements-dev.txt"
-# command to run tests
+
+before_script:
+  - pylint --rcfile=.pylint.rcfile shortref/  || true
+  - pylint --rcfile=.pylint.rcfile clarindspace/  || true
+  - pep8 --show-source --show-pep8 --statistics --max-line-length=100 clarindspace shortref || true
+
 script:
-  - pylint --rcfile=.pylint.rcfile org/  || true
-  - pylint --rcfile=.pylint.rcfile clarin_dspace/  || true
-  - pep8 --show-source --show-pep8 --statistics --max-line-length=100  --filename=*.py ./ || true
+  - nosetests -v ./tests/

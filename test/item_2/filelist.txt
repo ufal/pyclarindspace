@@ -1,2 +1,0 @@
-./test/item_2/filelist.txt
-./test/item_2/item_metadata.json
