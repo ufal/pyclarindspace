@@ -1,8 +1,10 @@
 # coding=utf-8
 import os
 import logging
+import urllib
 from pprint import pformat
 from requests_toolbelt.multipart.encoder import MultipartEncoder
+_logger = logging.getLogger("clarindspace")
 
 
 class item(object):
@@ -16,6 +18,47 @@ class item(object):
         self._id = item_id
         self._handle = handle
         self._repository = repository
+
+    @staticmethod
+    def bitstream_info_from_pid(pid_url, mimetype=None):
+        """
+            Appends well known magic to the `pid_url` and retrieves the  metadata instead of the 
+            landing page. The metadata are parsed to get the mimetype and bitstream url.
+
+            The algorithm looks for items that have ResourceType set to `Resource`.
+        """
+        import xml.etree.ElementTree as ET
+        pid_metadata_url = pid_url + "@format=cmdi"
+
+        _logger.info("Fetching metadata in CMDI format [%s]", pid_metadata_url)
+        ns = "{http://www.clarin.eu/cmd/}"
+        metadata = urllib.urlopen(pid_metadata_url).read()
+        root = ET.fromstring(metadata)
+
+        # finding bitstream elements
+        bitstream_info_arr = []
+        for proxy in root.findall('.//%sResourceProxy' % ns):
+            rt = proxy.find("./%sResourceType" % ns)
+            rr = proxy.find("./%sResourceRef" % ns)
+            if rt.text == "Resource":
+                bitstream_info_arr.append(
+                    (rt.attrib.get("mimetype", "unknown"), rr.text)
+                )
+        _logger.info("Found [%d] bitstreams elements in ResourceProxy elements", len(
+            bitstream_info_arr))
+
+        if mimetype is not None:
+            _logger.info(
+                "Filtering bitstreams according to specified mimetype [%s]", mimetype)
+            bitstream_info_arr = [
+                x for x in bitstream_info_arr if x[0] == mimetype]
+
+        _logger.info(
+            "Found\n%s",
+            "\n".join(["%2d. %s [%s]" % (i, x[1], x[0])
+                       for i, x in enumerate(bitstream_info_arr)])
+        )
+        return bitstream_info_arr
 
     @property
     def id(self):

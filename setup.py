@@ -1,7 +1,6 @@
 # coding=utf-8
 import clarindspace
 from setuptools import setup
-from os import path
 
 setup(
     name=clarindspace.__title__,
@@ -19,6 +18,6 @@ setup(
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
     ],
-    packages=['clarindspace'],
+    packages=['clarindspace', 'shortref'],
     install_requires=['requests', 'requests_toolbelt'],
 )
