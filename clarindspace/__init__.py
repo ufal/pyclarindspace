@@ -7,5 +7,5 @@ from ._item import item
 from ._handle import handle
 
 __title__ = 'clarindspace'
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 __license__ = 'MIT'
