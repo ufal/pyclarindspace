@@ -26,6 +26,10 @@ class collection(object):
         """Create item in this collection"""
         url = '/collections/' + str(self._id) + '/items'
         js = self._repository.api_post(url, {'metadata': item_metadata})
-        logging.info('Created item with name [%s] and id [%s]', js[
-                     'name'], js['id'])
+        logging.info(
+            'Created item with name [%s] and id [%s] and handle [%s]',
+            js['name'],
+            js['id'],
+            js['handle']
+        )
         return item(js['name'], js['id'], js['handle'], self._repository)

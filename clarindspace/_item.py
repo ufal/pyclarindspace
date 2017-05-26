@@ -72,13 +72,15 @@ class item(object):
     def handle(self):
         return self._handle
 
-    def add_bitstream(self, data_file_path):
+    def add_bitstream(self, data_file_path, mime_type=None):
         """
             Upload file located at data_file_path to item
         """
         # get file name; used as the bitstream name & for format detection
         data_file_name = os.path.basename(data_file_path)
         url = '/items/' + str(self._id) + '/bitstreams?name=' + data_file_name
+        if mime_type is not None:
+            url += "&file_mime_type=%s" % mime_type
 
         # With this encoder the file should not be read in memory, but streamed
         # right away

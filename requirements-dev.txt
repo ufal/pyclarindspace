@@ -3,3 +3,4 @@ requests_toolbelt
 pylint
 nose
 pep8
+rdflib
