@@ -4,6 +4,7 @@ import os
 import sys
 import json
 from pprint import pformat
+from future.utils import iteritems
 import clarindspace
 from clarindspace import imports
 
@@ -39,7 +40,7 @@ if __name__ == '__main__':
     ingest_d = {}
 
     # update paths, check if files exist
-    for metadata_file, file_paths in data_map.iteritems():
+    for metadata_file, file_paths in iteritems(data_map):
         _logger.info(
             u"Preparing [%s] with [%d] bitstream(s).",
             os.path.basename(metadata_file),
@@ -86,7 +87,7 @@ if __name__ == '__main__':
     _logger.debug(pformat(collection.id))
 
     # import items from the provided dir
-    for _1, (m_arr, file_paths) in ingest_d.iteritems():
+    for _1, (m_arr, file_paths) in iteritems(ingest_d):
         submitted_item = collection.create_item(m_arr)
         _logger.debug(pformat(submitted_item))
         for file_path in file_paths:

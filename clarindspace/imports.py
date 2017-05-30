@@ -2,6 +2,7 @@
 import logging
 import re
 import sys
+from builtins import str as text
 from pprint import pformat
 
 _logger = logging.getLogger("clarindspace")
@@ -51,7 +52,7 @@ class example_rdf(object):
             # print "%20s %20s %s" % (subj, pred, obj)
             k = example_rdf._map.get(str(pred), None)
             if k is not None:
-                v = unicode(obj)
+                v = text(obj)
                 if isinstance(k, tuple):
                     k, rec, value_norm = k
                     if rec is not None:
@@ -61,7 +62,7 @@ class example_rdf(object):
                         v = m.group(1)
                     v = getattr(self, value_norm)(v, triples)
                 if v is not None and len(v) > 0:
-                    m_arr.append(self.triple(k, unicode(v).strip()))
+                    m_arr.append(self.triple(k, text(v).strip()))
 
         # specific touches - should be updated based on imported data
         d = dict([(x["key"], x["value"]) for x in m_arr])
