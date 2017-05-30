@@ -3,13 +3,14 @@ import logging
 import re
 import sys
 from pprint import pformat
+
+_logger = logging.getLogger("clarindspace")
+
 try:
     import rdflib
 except:
-    print "Library rdflib is not installed - execute `pip install rdflib`"
-    sys.exit(0)
-
-_logger = logging.getLogger("clarindspace")
+    _logger.error("Library rdflib is not installed - execute `pip install rdflib`")
+    sys.exit(1)
 
 
 class example_rdf(object):
