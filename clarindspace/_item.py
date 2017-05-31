@@ -114,3 +114,7 @@ class item(object):
                 'language': None
             }]
         )
+
+    def get_metadata(self):
+        url = '/items/' + str(self._id) + '/metadata'
+        return self._repository.api_get(url)
