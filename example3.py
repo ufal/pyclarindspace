@@ -4,13 +4,13 @@ import os
 import sys
 import json
 from pprint import pformat
-from future.utils import iteritems
 import clarindspace
 from clarindspace import imports
 
 __debug = os.environ.get('DEBUG', 'False') == 'True'
 logging_level = logging.INFO if not __debug else logging.DEBUG
-logging.basicConfig(format='%(asctime)s %(filename)s:%(lineno)s %(message)s', level=logging_level)
+logging.basicConfig(
+    format='%(asctime)s %(filename)s:%(lineno)s %(message)s', level=logging_level)
 logging.debug('Set log level to [%s]', logging_level)
 _logger = logging.getLogger()
 
@@ -40,7 +40,7 @@ if __name__ == '__main__':
     ingest_d = {}
 
     # update paths, check if files exist
-    for metadata_file, file_paths in iteritems(data_map):
+    for metadata_file, file_paths in data_map.items():
         _logger.info(
             u"Preparing [%s] with [%d] bitstream(s).",
             os.path.basename(metadata_file),
@@ -56,9 +56,6 @@ if __name__ == '__main__':
         _logger.info(u"Loading [%s]", metadata_file)
         importer = imports.example_rdf(metadata_file)
         m_arr = importer.parse_to_dspace_triples()
-        if len(file_paths) > 0:
-            m_arr.append(importer.triple("local.has.files", "yes"))
-            m_arr.append(importer.triple("local.files.count", len(file_paths)))
         ingest_d[metadata_file] = (m_arr, file_paths)
 
     # Use admin account a) creating com & col b) no hassle with user rights
@@ -87,11 +84,12 @@ if __name__ == '__main__':
     _logger.debug(pformat(collection.id))
 
     # import items from the provided dir
-    for _1, (m_arr, file_paths) in iteritems(ingest_d):
+    for _1, (m_arr, file_paths) in ingest_d.items():
         _logger.debug("Submitted m_arr = [%s]", pformat(m_arr))
         submitted_item = collection.create_item(m_arr)
         _logger.debug(pformat(vars(submitted_item)))
-        _logger.debug("get_metadata = [%s]", pformat(submitted_item.get_metadata()))
+        _logger.debug("get_metadata = [%s]", pformat(
+            submitted_item.get_metadata()))
         for file_path in file_paths:
             mimetype = None
             _1, suffix = os.path.splitext(file_path)
@@ -101,7 +99,8 @@ if __name__ == '__main__':
             submitted_item.add_bitstream(file_path, mimetype)
             if __debug:
                 for obj in submitted_item.get_metadata():
-                    if (obj['key'] == 'local.has.files' or obj['key'] == 'local.files.count'):
-                        _logger.debug("AFTER bitstream add: %s=%s", obj['key'], obj['value'])
+                    if obj['key'] == 'local.has.files' or obj['key'] == 'local.files.count':
+                        _logger.debug("AFTER bitstream add: %s=%s",
+                                      obj['key'], obj['value'])
 
     repository.logout()

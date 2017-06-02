@@ -2,15 +2,17 @@
 import logging
 import re
 import sys
-from builtins import str as text
-from pprint import pformat
-
+try:
+    from builtins import str as text
+except:
+    text = unicode
 _logger = logging.getLogger("clarindspace")
 
 try:
     import rdflib
 except:
-    _logger.error("Library rdflib is not installed - execute `pip install rdflib`")
+    _logger.error(
+        "Library rdflib is not installed - execute `pip install rdflib`")
     sys.exit(1)
 
 

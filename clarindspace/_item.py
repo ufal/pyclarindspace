@@ -90,8 +90,11 @@ class item(object):
             url, json_data=None, headers_update={'Content-Type': m.content_type}, data=m
         )
         logging.info(
-            'Created bitstream with name [%s] and id [%s]\n%s',
-            data_file_name, js['id'], pformat(js)
+            'Created bitstream with name [%s] and id [%s]',
+            data_file_name, js['id']
+        )
+        logging.debug(
+            'Bitstream id [%s] metadata\n%s', js['id'], pformat(js)
         )
 
     def replace_metadata_field(self, json_metadata_entry_array):
