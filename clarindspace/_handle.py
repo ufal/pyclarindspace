@@ -1,10 +1,7 @@
 # coding=utf-8
-try:
-    from urllib import urlopen
-except:
-    from urllib.request import urlopen
 import logging
 import json
+from ._utils import urlopen, json_from_url
 _logger = logging.getLogger("clarindspace")
 
 
@@ -25,7 +22,6 @@ class handle(object):
             metadata = urlopen(self._hurl + "?noredirect").read()
             return metadata
         else:
-            js_str = urlopen(handle.api_url + self.basename()).read()
-            js = json.loads(js_str)
+            js = json_from_url(handle.api_url + self.basename())
             js = js["values"]
             return js

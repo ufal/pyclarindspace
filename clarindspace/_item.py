@@ -1,7 +1,7 @@
 # coding=utf-8
 import os
 import logging
-import urllib
+from ._utils import urlopen
 from pprint import pformat
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 _logger = logging.getLogger("clarindspace")
@@ -32,7 +32,7 @@ class item(object):
 
         _logger.info("Fetching metadata in CMDI format [%s]", pid_metadata_url)
         ns = "{http://www.clarin.eu/cmd/}"
-        metadata = urllib.urlopen(pid_metadata_url).read()
+        metadata = urlopen(pid_metadata_url).read()
         root = ET.fromstring(metadata)
 
         # finding bitstream elements
