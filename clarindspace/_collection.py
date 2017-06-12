@@ -33,3 +33,12 @@ class collection(object):
             js['handle']
         )
         return item(js['name'], js['id'], js['handle'], self._repository)
+
+    def get_items(self):
+        """Fetch all items in collection"""
+        # No paging list all hack
+        url = '/collections/' + str(self._id) + '?expand=items&limit=-1'
+        js = self._repository.api_get(url)
+        logging.info('Fetched items for collection [%s]', self._name)
+        return (item(js_item['name'], js_item['id'], js_item['handle']) for js_item in js['items'])
+
