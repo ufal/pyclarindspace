@@ -21,4 +21,6 @@ if __name__ == '__main__':
         url for mimetype, url in bitstream_pids
         if mimetype not in ("text/html", )
     ])
-    logging.warning(pformat(bitstream_urls))
+    logging.warning("Found [%d] urls:\n%s" % (
+        len(bitstream_urls), pformat(bitstream_urls)
+    ))
