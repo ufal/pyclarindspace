@@ -82,12 +82,8 @@ class item(object):
         if mime_type is not None:
             url += "&file_mime_type=%s" % mime_type
 
-        # With this encoder the file should not be read in memory, but streamed
-        # right away
-        m = MultipartEncoder([('filename', open(data_file_path, 'rb'))])
-
         js = self._repository.api_post(
-            url, json_data=None, headers_update={'Content-Type': m.content_type}, data=m
+            url, json_data=None, data=open(data_file_path, 'rb')
         )
         logging.info(
             'Created bitstream with name [%s] and id [%s]',
