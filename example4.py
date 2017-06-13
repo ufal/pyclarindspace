@@ -17,4 +17,8 @@ if __name__ == '__main__':
     for p in pids:
         item_pids = clarindspace.item.bitstream_info_from_pid(p)
         bitstream_pids += item_pids
-    logging.warning(pformat(bitstream_pids))
+    bitstream_urls = sorted([
+        url for mimetype, url in bitstream_pids
+        if mimetype not in ("text/html", )
+    ])
+    logging.warning(pformat(bitstream_urls))
