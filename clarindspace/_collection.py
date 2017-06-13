@@ -34,7 +34,7 @@ class collection(object):
         )
         return item(js['name'], js['id'], js['handle'], self._repository)
 
-    def get_items(self):
+    def items(self):
         """Fetch all items in collection"""
         # No paging list all hack
         url = '/collections/' + str(self._id) + '?expand=items&limit=-1'
@@ -42,3 +42,14 @@ class collection(object):
         logging.info('Fetched items for collection [%s]', self._name)
         return (item(js_item['name'], js_item['id'], js_item['handle']) for js_item in js['items'])
 
+    def items_pid(self):
+        """ Return list of pids of items. """
+        url = '/collections/' + str(self._id) + '/items'
+        js = self._repository.api_get(url)
+        items = [ "http://hdl.handle.net/%s" % x["handle"] for x in js]
+        logging.info(
+            'Found [%d] items in collection [id:%s]',
+            len(items),
+            self._id
+        )
+        return items
