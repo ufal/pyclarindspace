@@ -124,7 +124,7 @@ class repository(object):
                     collection(js_col["name"], js_col["id"], self),
                     self
                 )
-        except Exception, e:
+        except:
             pass
         return None
 
