@@ -44,9 +44,7 @@ class collection(object):
 
     def items_pid(self):
         """ Return list of pids of items. """
-        url = '/collections/' + str(self._id) + '/items'
-        js = self._repository.api_get(url)
-        items = [ "http://hdl.handle.net/%s" % x["handle"] for x in js]
+        items = ["http://hdl.handle.net/%s" % i.handle for i in self.items()]
         logging.info(
             'Found [%d] items in collection [id:%s]',
             len(items),
