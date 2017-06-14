@@ -3,7 +3,6 @@ import os
 import logging
 from ._utils import urlopen
 from pprint import pformat
-from requests_toolbelt.multipart.encoder import MultipartEncoder
 _logger = logging.getLogger("clarindspace")
 
 
@@ -166,3 +165,11 @@ class item(object):
             cleaned_up_metadata.append(obj)
 
         return cleaned_up_metadata
+
+    @staticmethod
+    def metadata(key, value, lang=None):
+        return {
+            "key": key,
+            "value": value,
+            "language": lang
+        }

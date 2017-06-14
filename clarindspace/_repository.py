@@ -1,8 +1,15 @@
 # coding=utf-8
 import logging
-from pprint import pformat
+try:
+    from urllib.parse import urljoin
+except:
+    from urlparse import urljoin
+
 import requests
+from pprint import pformat
 from ._community import community
+from ._collection import collection
+from ._item import item
 _logger = logging.getLogger("clarindspace")
 
 
@@ -17,7 +24,7 @@ class repository(object):
                 base_url (str): The repository url up to /rest or /xmlui
         """
         self._base_url = base_url
-        self._api_url = base_url + '/rest'
+        self._api_url = urljoin(base_url, 'rest/')
         self._token = None
         self._request_headers = None
 
@@ -40,7 +47,8 @@ class repository(object):
             args["headers"] = h
 
         args.update(kwargs)
-        r = requests.post(self._api_url + url, **args)
+        api_url = urljoin(self._api_url, url.lstrip("/"))
+        r = requests.post(api_url, **args)
         _logger.debug(pformat(r))
         try:
             r.raise_for_status()
@@ -98,6 +106,27 @@ class repository(object):
         """Search for community by name and if fail create new one with that name"""
         com = self.find_community_by_name(name)
         return com if com is not None else self.create_community(name)
+
+    def find_item(self, pid):
+        """Search for community by name and if fail create new one with that name"""
+        try:
+            js = self.api_post(
+                '/items/find-by-metadata-field?expand=parentCollection',
+                item.metadata('dc.identifier.uri', pid, "*")
+            )
+            if len(js) == 1:
+                js = js[0]
+                js_col = js["parentCollection"]
+                return item(
+                    js['name'],
+                    js['id'],
+                    js['handle'],
+                    collection(js_col["name"], js_col["id"], self),
+                    self
+                )
+        except Exception, e:
+            pass
+        return None
 
     def logout(self):
         self.api_post('/logout', None, parse_json=False)

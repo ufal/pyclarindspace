@@ -2,6 +2,7 @@
 import logging
 import re
 import sys
+from ._item import item
 try:
     from builtins import str as text
 except:
@@ -64,30 +65,23 @@ class example_rdf(object):
                         v = m.group(1)
                     v = getattr(self, value_norm)(v, triples)
                 if v is not None and len(v) > 0:
-                    m_arr.append(self.triple(k, text(v).strip()))
+                    m_arr.append(item.metadata(k, text(v).strip()))
 
         # specific touches - should be updated based on imported data
         d = dict([(x["key"], x["value"]) for x in m_arr])
         if "dc.rights.uri" in d:
             # fill out others required if not present
             if "dc.rights" not in d:
-                m_arr.append(self.triple("dc.rights", d["dc.rights.uri"]))
+                m_arr.append(item.metadata("dc.rights", d["dc.rights.uri"]))
             if "dc.rights.label" not in d:
                 val = "PUB" if "creativecommons" in d["dc.rights.uri"] else ""
-                m_arr.append(self.triple("dc.rights.label", val))
+                m_arr.append(item.metadata("dc.rights.label", val))
         if "dc.type" not in d:
-            m_arr.append(self.triple("dc.type", "numeric-set"))
+            m_arr.append(item.metadata("dc.type", "numeric-set"))
 
         d = dict([(x["key"], x["value"]) for x in m_arr])
         _logger.debug("Extracted keys [%s]", ",".join(d.keys()))
         return m_arr
-
-    def triple(self, key, value, lang=None):
-        return {
-            "key": key,
-            "value": value,
-            "language": lang
-        }
 
     @staticmethod
     def _rights_fixer(val, *args, **kwargs):
