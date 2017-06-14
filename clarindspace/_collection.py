@@ -32,7 +32,7 @@ class collection(object):
             js['id'],
             js['handle']
         )
-        return item(js['name'], js['id'], js['handle'], self._repository)
+        return item(js['name'], js['id'], js['handle'], self, self._repository)
 
     def items(self):
         """Fetch all items in collection"""
@@ -40,7 +40,7 @@ class collection(object):
         url = '/collections/' + str(self._id) + '?expand=items&limit=-1'
         js = self._repository.api_get(url)
         logging.info('Fetched items for collection [%s]', self._name)
-        return (item(js_item['name'], js_item['id'], js_item['handle']) for js_item in js['items'])
+        return (item(js_item['name'], js_item['id'], js_item['handle'], self, self._repository) for js_item in js['items'])
 
     def items_pid(self):
         """ Return list of pids of items. """

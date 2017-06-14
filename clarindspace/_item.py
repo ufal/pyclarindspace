@@ -12,12 +12,13 @@ class item(object):
         DSpace item representation. Holds name, id & handle; methods to add bitstreams
     """
 
-    def __init__(self, name, item_id, handle, repository=None):
+    def __init__(self, name, item_id, handle, owning_collection, repository=None):
         """Constructor for Item"""
         self._name = name
         self._id = item_id
         self._handle = handle
         self._repository = repository
+        self._owning_collection = owning_collection
 
     @staticmethod
     def bitstream_info_from_pid(pid_url, mimetype=None):
@@ -102,6 +103,12 @@ class item(object):
             '/items/' + str(self._id) + '/metadata', json_metadata_entry_array)
         logging.info('Successfully replaced metadata on item [%s].', self._id)
 
+    def add_metadata(self, json_metadata_entry_array):
+        """Add metadata entries"""
+        self._repository.api_post(
+            '/items/' + str(self._id) + '/metadata', json_metadata_entry_array, parse_json=False)
+        logging.info('Successfully added metadata to item [%s].', self._id)
+
     def update_identifier(self, handle):
         """
             Replace all dc.identifier.uri with the supplied handle
@@ -117,3 +124,45 @@ class item(object):
     def get_metadata(self):
         url = '/items/' + str(self._id) + '/metadata'
         return self._repository.api_get(url)
+
+    def create_new_version(self):
+        """Creates a new item as a version of this"""
+        # will reuse the metadata (cleanup needed)
+        cleaned_up_metadata = item.cleanup_metadata_for_copy(self.get_metadata(), ' v2.0')
+        # finally add note
+        cleaned_up_metadata.append({'key':'local.submission.note', 'value': 'Thise item is a new version of ' + self.handle})
+        # prepare replaces field
+        cleaned_up_metadata.append({'key': 'dc.relation.replaces', 'value': 'http://hdl.handle.net/' + self.handle})
+        new_version = self._owning_collection.create_item(cleaned_up_metadata)
+        # update self with isreplacedby seems not needed, probably triggered by presence of dc.relation.replaces
+        # self.add_metadata([{'key': 'dc.relation.isreplacedby', 'value': 'http://hdl.handle.net/' + new_version.handle}])
+        return new_version
+
+    def create_related_item(self):
+        """Creates a new item based on this links them through dc.relation"""
+        # will reuse the metadata (cleanup needed)
+        cleaned_up_metadata = item.cleanup_metadata_for_copy(self.get_metadata(), ' (related item)')
+        # finally add note
+        cleaned_up_metadata.append({'key':'local.submission.note', 'value': 'Thise item is related to ' + self.handle})
+        # add relation to the new item
+        cleaned_up_metadata.append({'key': 'dc.relation', 'value': 'http://hdl.handle.net/' + self.handle})
+        related_item = self._owning_collection.create_item(cleaned_up_metadata)
+        # update self with dc.relation
+        self.add_metadata([{'key': 'dc.relation', 'value': 'http://hdl.handle.net/' + related_item.handle}])
+        return related_item
+
+    @staticmethod
+    def cleanup_metadata_for_copy(metadata, append_to_title):
+        # see https://github.com/ufal/clarin-dspace/blob/clarin/dspace-xmlui/src/main/java/cz/cuni/mff/ufal/dspace/app/xmlui/aspect/submission/submit/AddNewVersionAction.java
+        omit_keys = ('dc.identifier.uri', 'dc.date.accessioned', 'dc.date.available', 'dc.description.provenance',
+                     'local.featuredService', 'local.submission.note', 'dc.relation.replaces',
+                     'dc.relation.isreplacedby', 'local.branding')
+        cleaned_up_metadata = []
+        for obj in metadata:
+            if obj['key'] == 'dc.title':
+                obj['value'] += append_to_title
+            elif obj['key'] in omit_keys:
+                continue
+            cleaned_up_metadata.append(obj)
+
+        return cleaned_up_metadata
