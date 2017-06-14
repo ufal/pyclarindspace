@@ -1,7 +1,7 @@
 # coding=utf-8
 import os
 import logging
-from ._utils import urlopen
+from ._utils import urlopen, urlretrieve, urljoin
 from pprint import pformat
 _logger = logging.getLogger("clarindspace")
 
@@ -124,6 +124,14 @@ class item(object):
         url = '/items/' + str(self._id) + '/metadata'
         return self._repository.api_get(url)
 
+    def bitstreams(self):
+        url = '/items/' + str(self._id) + '/bitstreams'
+        return self._repository.api_get(url)
+
+    def delete_bitstreams(self, id_str):
+        url = '/items/' + str(self._id) + '/bitstreams/' + str(id_str)
+        return self._repository.api_delete(url)
+
     def create_new_version(self):
         """Creates a new item as a version of this"""
         # will reuse the metadata (cleanup needed)
@@ -165,6 +173,15 @@ class item(object):
             cleaned_up_metadata.append(obj)
 
         return cleaned_up_metadata
+
+    def download_bitstreams(self):
+        arr = self.bitstreams()
+        local_files = []
+        for b in arr:
+            download_url = urljoin(self._repository._api_url, b["retrieveLink"].lstrip("/"))
+            file_name, _1 = urlretrieve(download_url)
+            local_files.append(file_name)
+        return local_files
 
     @staticmethod
     def metadata(key, value, lang=None):

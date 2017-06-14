@@ -1,9 +1,11 @@
 # coding=utf-8
 import json
 try:
-    from urllib import urlopen
+    from urllib import urlopen, urlretrieve
+    from urlparse import urljoin
 except:
-    from urllib.request import urlopen
+    from urllib.request import urlopen, urlretrieve
+    from urllib.parse import urljoin
 
 
 def json_from_url(url, encoding="utf-8"):

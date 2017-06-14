@@ -14,6 +14,9 @@ if __name__ == '__main__':
     repository = clarindspace.repository(REPO_URL)
     repository.login(ADMIN_EMAIL, ADMIN_PASS)
 
+    item = repository.find_item("http://hdl.handle.net/21.T11998/3728")
+    arr = item.download_bitstreams()
+
     item = repository.find_item("http://hdl.handle.net/21.T11998/34937")
     print(pformat(item.get_metadata()))
 

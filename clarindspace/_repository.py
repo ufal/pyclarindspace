@@ -1,15 +1,11 @@
 # coding=utf-8
 import logging
-try:
-    from urllib.parse import urljoin
-except:
-    from urlparse import urljoin
-
 import requests
 from pprint import pformat
 from ._community import community
 from ._collection import collection
 from ._item import item
+from ._utils import urljoin
 _logger = logging.getLogger("clarindspace")
 
 
@@ -58,8 +54,20 @@ class repository(object):
 
     def api_put(self, url, data):
         """ http put """
-        r = requests.put(self._api_url + url, json=data,
-                         headers=self._request_headers)
+        api_url = urljoin(self._api_url, url.lstrip("/"))
+        r = requests.put(
+            api_url, json=data, headers=self._request_headers
+        )
+        _logger.debug(pformat(r))
+        r.raise_for_status()
+        return r.text
+
+    def api_delete(self, url):
+        """ http put """
+        api_url = urljoin(self._api_url, url.lstrip("/"))
+        r = requests.delete(
+            api_url, headers=self._request_headers
+        )
         _logger.debug(pformat(r))
         r.raise_for_status()
         return r.text
