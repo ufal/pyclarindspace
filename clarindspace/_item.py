@@ -106,7 +106,7 @@ class item(object):
     def add_metadata(self, json_metadata_entry_array):
         """Add metadata entries"""
         self._repository.api_post(
-            '/items/' + str(self._id) + '/metadata', json_metadata_entry_array)
+            '/items/' + str(self._id) + '/metadata', json_metadata_entry_array, parse_json=False)
         logging.info('Successfully added metadata to item [%s].', self._id)
 
     def update_identifier(self, handle):
@@ -131,22 +131,23 @@ class item(object):
         # will reuse the metadata (cleanup might needed)
         # see https://github.com/ufal/clarin-dspace/blob/clarin/dspace-xmlui/src/main/java/cz/cuni/mff/ufal/dspace/app/xmlui/aspect/submission/submit/AddNewVersionAction.java
         omit_keys = ('dc.identifier.uri', 'dc.date.accessioned', 'dc.date.available', 'dc.description.provenance',
-                     'local.featuredService', 'dc.relation.replaces', 'dc.relation.isreplacedby')
-        cleaned_up_metadata = ()
+                     'local.featuredService', 'local.submission.note', 'dc.relation.replaces', 'dc.relation.isreplacedby')
+        cleaned_up_metadata = []
         for obj in metadata:
             if obj['key'] == 'dc.title':
                 obj['value'] += ' v2.0'
-            elif obj['key'] == 'local.submission.note':
-                obj['value'] = 'Thise item is a new version of ' + self.handle
             elif obj['key'] in omit_keys:
                 continue
             cleaned_up_metadata.append(obj)
+
+        # finally add note
+        cleaned_up_metadata.append({'key':'local.submission.note', 'value': 'Thise item is a new version of ' + self.handle})
 
 
         # prepare replaces field
         cleaned_up_metadata.append({'key': 'dc.relation.replaces', 'value': 'http://hdl.handle.net/' + self.handle})
         new_version = self._owning_collection.create_item(cleaned_up_metadata)
-        # update self with isreplacedby
-        self.add_metadata([{'key': 'dc.relation.isreplacedby', 'value': 'http://hdl.handle.net/' + new_version.handle}])
+        # update self with isreplacedby seems not needed, probably triggered by presence of dc.relation.replaces
+        # self.add_metadata([{'key': 'dc.relation.isreplacedby', 'value': 'http://hdl.handle.net/' + new_version.handle}])
         return new_version
 
