@@ -123,13 +123,20 @@ class repository(object):
                 item.metadata('dc.identifier.uri', pid, "*")
             )
 
-            # * and NULL are treated differently for some reason #MAYBE_BUG
-            # workaround
+            # DS-3671 * not treated as wildcard in /find-by-metadata-field
+            # workaround null
             if len(js) == 0:
                 js = self.api_post(
                      '/items/find-by-metadata-field?expand=parentCollection',
                      item.metadata('dc.identifier.uri', pid)
-            )
+                )
+
+            # workaround empty string
+            if len(js) == 0:
+                js = self.api_post(
+                    '/items/find-by-metadata-field?expand=parentCollection',
+                    item.metadata('dc.identifier.uri', pid, "")
+                )
 
             if len(js) == 1:
                 js = js[0]
