@@ -122,6 +122,15 @@ class repository(object):
                 '/items/find-by-metadata-field?expand=parentCollection',
                 item.metadata('dc.identifier.uri', pid, "*")
             )
+
+            # * and NULL are treated differently for some reason #MAYBE_BUG
+            # workaround
+            if len(js) == 0:
+                js = self.api_post(
+                     '/items/find-by-metadata-field?expand=parentCollection',
+                     item.metadata('dc.identifier.uri', pid)
+            )
+
             if len(js) == 1:
                 js = js[0]
                 js_col = js["parentCollection"]
