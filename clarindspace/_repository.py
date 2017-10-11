@@ -26,7 +26,8 @@ class repository(object):
 
     def api_get(self, url):
         """ http get """
-        r = requests.get(self._api_url + url, headers=self._request_headers)
+        api_url = urljoin(self._api_url, url.lstrip("/"))
+        r = requests.get(api_url, headers=self._request_headers)
         _logger.debug(pformat(r))
         r.raise_for_status()
         return r.json()
@@ -127,8 +128,8 @@ class repository(object):
             # workaround null
             if len(js) == 0:
                 js = self.api_post(
-                     '/items/find-by-metadata-field?expand=parentCollection',
-                     item.metadata('dc.identifier.uri', pid)
+                    '/items/find-by-metadata-field?expand=parentCollection',
+                    item.metadata('dc.identifier.uri', pid)
                 )
 
             # workaround empty string
