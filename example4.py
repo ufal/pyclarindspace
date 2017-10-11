@@ -1,16 +1,31 @@
 # coding=utf-8
 import logging
 import os
+
+import sys
+
 import clarindspace
 from pprint import pformat
 logging.basicConfig(format='%(asctime)s %(message)s', level=logging.WARNING)
 _logger = logging.getLogger()
 
 if __name__ == '__main__':
-    REPO_URL = os.environ.get('REPO_URL') or "https://rda-summerschool.csc.fi/repository/"
+    REPO_URL = os.environ.get(
+        'REPO_URL') or "https://rda-summerschool.csc.fi/repository/"
     repository = clarindspace.repository(REPO_URL)
-    community = repository.find_community_by_name('RDA community')
-    collection = community.find_collection_by_name('RDA collection')
+
+    community_name = sys.argv[1] if 1 < len(sys.argv) else 'RDA community'
+    community = repository.find_community_by_name(community_name)
+    if community is None:
+        logging.warning("Did not find the specified community!")
+        sys.exit(1)
+
+    collection_name = sys.argv[2] if 2 < len(sys.argv) else 'RDA collection'
+    collection = community.find_collection_by_name(collection_name)
+    if collection is None:
+        logging.warning("Did not find the specified collection!")
+        sys.exit(1)
+
     pids = collection.items_pid()
     _logger.info(pformat(pids))
     bitstream_pids = []

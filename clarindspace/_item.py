@@ -33,7 +33,12 @@ class item(object):
         _logger.info("Fetching metadata in CMDI format [%s]", pid_metadata_url)
         ns = "{http://www.clarin.eu/cmd/}"
         metadata = urlopen(pid_metadata_url).read()
-        root = ET.fromstring(metadata)
+        try:
+            root = ET.fromstring(metadata)
+        except ET.ParseError:
+            # is CMDI metadata available?
+            _logger.warning("Received ill-formed metadata!")
+            return []
 
         # finding bitstream elements
         bitstream_info_arr = []
@@ -135,11 +140,14 @@ class item(object):
     def create_new_version(self):
         """Creates a new item as a version of this"""
         # will reuse the metadata (cleanup needed)
-        cleaned_up_metadata = item.cleanup_metadata_for_copy(self.get_metadata(), ' v2.0')
+        cleaned_up_metadata = item.cleanup_metadata_for_copy(
+            self.get_metadata(), ' v2.0')
         # finally add note
-        cleaned_up_metadata.append({'key':'local.submission.note', 'value': 'Thise item is a new version of ' + self.handle})
+        cleaned_up_metadata.append(
+            {'key': 'local.submission.note', 'value': 'Thise item is a new version of ' + self.handle})
         # prepare replaces field
-        cleaned_up_metadata.append({'key': 'dc.relation.replaces', 'value': 'http://hdl.handle.net/' + self.handle})
+        cleaned_up_metadata.append(
+            {'key': 'dc.relation.replaces', 'value': 'http://hdl.handle.net/' + self.handle})
         new_version = self._owning_collection.create_item(cleaned_up_metadata)
         # update self with isreplacedby seems not needed, probably triggered by presence of dc.relation.replaces
         # self.add_metadata([{'key': 'dc.relation.isreplacedby', 'value': 'http://hdl.handle.net/' + new_version.handle}])
@@ -148,19 +156,24 @@ class item(object):
     def create_related_item(self):
         """Creates a new item based on this links them through dc.relation"""
         # will reuse the metadata (cleanup needed)
-        cleaned_up_metadata = item.cleanup_metadata_for_copy(self.get_metadata(), ' (related item)')
+        cleaned_up_metadata = item.cleanup_metadata_for_copy(
+            self.get_metadata(), ' (related item)')
         # finally add note
-        cleaned_up_metadata.append({'key':'local.submission.note', 'value': 'Thise item is related to ' + self.handle})
+        cleaned_up_metadata.append(
+            {'key': 'local.submission.note', 'value': 'Thise item is related to ' + self.handle})
         # add relation to the new item
-        cleaned_up_metadata.append({'key': 'dc.relation', 'value': 'http://hdl.handle.net/' + self.handle})
+        cleaned_up_metadata.append(
+            {'key': 'dc.relation', 'value': 'http://hdl.handle.net/' + self.handle})
         related_item = self._owning_collection.create_item(cleaned_up_metadata)
         # update self with dc.relation
-        self.add_metadata([{'key': 'dc.relation', 'value': 'http://hdl.handle.net/' + related_item.handle}])
+        self.add_metadata(
+            [{'key': 'dc.relation', 'value': 'http://hdl.handle.net/' + related_item.handle}])
         return related_item
 
     @staticmethod
     def cleanup_metadata_for_copy(metadata, append_to_title):
-        # see https://github.com/ufal/clarin-dspace/blob/clarin/dspace-xmlui/src/main/java/cz/cuni/mff/ufal/dspace/app/xmlui/aspect/submission/submit/AddNewVersionAction.java
+        # see
+        # https://github.com/ufal/clarin-dspace/blob/clarin/dspace-xmlui/src/main/java/cz/cuni/mff/ufal/dspace/app/xmlui/aspect/submission/submit/AddNewVersionAction.java
         omit_keys = ('dc.identifier.uri', 'dc.date.accessioned', 'dc.date.available', 'dc.description.provenance',
                      'local.featuredService', 'local.submission.note', 'dc.relation.replaces',
                      'dc.relation.isreplacedby', 'local.branding')
@@ -178,7 +191,8 @@ class item(object):
         arr = self.bitstreams()
         local_files = []
         for b in arr:
-            download_url = urljoin(self._repository._api_url, b["retrieveLink"].lstrip("/"))
+            download_url = urljoin(self._repository._api_url, b[
+                                   "retrieveLink"].lstrip("/"))
             file_name, _1 = urlretrieve(download_url)
             local_files.append(file_name)
         return local_files
