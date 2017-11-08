@@ -18,6 +18,7 @@ class item(object):
         self._handle = handle
         self._repository = repository
         self._owning_collection = owning_collection
+        self._metadata = None
 
     @staticmethod
     def bitstream_info_from_pid(pid_url, mimetype=None):
@@ -127,7 +128,9 @@ class item(object):
 
     def get_metadata(self):
         url = '/items/' + str(self._id) + '/metadata'
-        return self._repository.api_get(url)
+        if not self._metadata:
+            self._metadata = self._repository.api_get(url)
+        return self._metadata
 
     def bitstreams(self):
         url = '/items/' + str(self._id) + '/bitstreams'
