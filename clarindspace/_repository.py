@@ -6,6 +6,7 @@ from ._community import community
 from ._collection import collection
 from ._item import item
 from ._utils import urljoin
+
 _logger = logging.getLogger("clarindspace")
 
 
@@ -117,41 +118,34 @@ class repository(object):
         return com if com is not None else self.create_community(name)
 
     def find_item(self, pid):
-        """Search for community by name and if fail create new one with that name"""
+        """Search for item based on provided pid"""
+        # DS-3671 * not treated as wildcard in /find-by-metadata-field
+        # workaround null
+        # workaround empty string
+        items = self.find_items_by_metadata('dc.identifier.uri', pid) or \
+                self.find_items_by_metadata('dc.identifier.uri', pid, None) or \
+                self.find_items_by_metadata('dc.identifier.uri', pid, "")
+        if len(items) > 0:
+            return items[0]
+        else:
+            return None
+
+    def find_items_by_metadata(self, field, exact_value, lang='*'):
         try:
             js = self.api_post(
                 '/items/find-by-metadata-field?expand=parentCollection',
-                item.metadata('dc.identifier.uri', pid, "*")
+                item.metadata(field, exact_value, lang)
             )
 
-            # DS-3671 * not treated as wildcard in /find-by-metadata-field
-            # workaround null
-            if len(js) == 0:
-                js = self.api_post(
-                    '/items/find-by-metadata-field?expand=parentCollection',
-                    item.metadata('dc.identifier.uri', pid)
-                )
-
-            # workaround empty string
-            if len(js) == 0:
-                js = self.api_post(
-                    '/items/find-by-metadata-field?expand=parentCollection',
-                    item.metadata('dc.identifier.uri', pid, "")
-                )
-
-            if len(js) == 1:
-                js = js[0]
-                js_col = js["parentCollection"]
-                return item(
-                    js['name'],
-                    js['id'],
-                    js['handle'],
-                    collection(js_col["name"], js_col["id"], self),
-                    self
-                )
+            return [item(js_item['name'], js_item['id'], js_item['handle'],
+                         collection(js_item['parentCollection']['name'],
+                                    js_item['parentCollection']['id'],
+                                    self),
+                         self)
+                    for js_item in js]
         except:
             pass
-        return None
+        return []
 
     def logout(self):
         self.api_post('/logout', None, parse_json=False)
