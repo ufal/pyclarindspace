@@ -91,9 +91,6 @@ class repository(object):
                         downloaded_file.write(chunk)
         return filename
 
-
-
-
     def login(self, email, password):
         """ Obtain access token for user with provided email and password """
         self._token = self.api_post(
