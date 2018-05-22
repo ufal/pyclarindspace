@@ -132,8 +132,8 @@ class item(object):
             self._metadata = self._repository.api_get(url)
         return self._metadata
 
-    def bitstreams(self):
-        url = '/items/' + str(self._id) + '/bitstreams'
+    def bitstreams(self, limit=20, offset=0):
+        url = '/items/' + str(self._id) + '/bitstreams' + '?limit=' + str(limit) + '&offset=' + str(offset)
         return self._repository.api_get(url)
 
     def delete_bitstreams(self, id_str):
@@ -190,13 +190,11 @@ class item(object):
 
         return cleaned_up_metadata
 
-    def download_bitstreams(self):
-        arr = self.bitstreams()
+    def download_bitstreams(self, limit=20, offset=0):
+        arr = self.bitstreams(limit, offset)
         local_files = []
         for b in arr:
-            download_url = urljoin(self._repository._api_url, b[
-                                   "retrieveLink"].lstrip("/"))
-            file_name, _1 = urlretrieve(download_url)
+            file_name = self._repository.api_download(b["retrieveLink"])
             local_files.append(file_name)
         return local_files
 

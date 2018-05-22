@@ -1,5 +1,6 @@
 # coding=utf-8
 import logging
+import re
 import requests
 from pprint import pformat
 from ._community import community
@@ -73,6 +74,22 @@ class repository(object):
         _logger.debug(pformat(r))
         r.raise_for_status()
         return r.text
+
+    def api_download(self, url):
+        """ streaming GET using content disposition """
+        api_url = urljoin(self._api_url, url.lstrip("/"))
+        with requests.get(api_url, headers=self._request_headers, stream=True) as r:
+            r.raise_for_status()
+            cd_match = re.findall('filename=["\']?([^"\']+)', r.headers.get('content-disposition', ''))
+            if len(cd_match) > 0:
+                filename = cd_match[0]
+            else:
+                filename = api_url.split('/', 1)[1].split('?')[0]
+            with open(filename, 'wb') as downloaded_file:
+                for chunk in r.iter_content(chunk_size=None):
+                    if chunk:
+                        downloaded_file.write(chunk)
+        return filename
 
     def login(self, email, password):
         """ Obtain access token for user with provided email and password """
