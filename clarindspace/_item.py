@@ -78,19 +78,21 @@ class item(object):
     def handle(self):
         return self._handle
 
-    def add_bitstream(self, data_file_path, mime_type=None):
+    def add_bitstream(self, data_file_path, mime_type=None, data_file_name=None):
         """
             Upload file located at data_file_path to item
         """
-        # get file name; used as the bitstream name & for format detection
-        data_file_name = os.path.basename(data_file_path)
+        if data_file_name is None:
+            # get file name; used as the bitstream name & for format detection
+            data_file_name = os.path.basename(data_file_path)
+
         url = '/items/' + str(self._id) + '/bitstreams?name=' + data_file_name
         if mime_type is not None:
             url += "&file_mime_type=%s" % mime_type
 
-        js = self._repository.api_post(
-            url, json_data=None, data=open(data_file_path, 'rb')
-        )
+        with open(data_file_path, 'rb') as f:
+            js = self._repository.api_post(url, json_data=None, data=f)
+
         logging.info(
             'Created bitstream with name [%s] and id [%s]',
             data_file_name, js['id']
