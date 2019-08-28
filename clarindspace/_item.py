@@ -78,7 +78,8 @@ class item(object):
     def handle(self):
         return self._handle
 
-    def add_bitstream(self, data_file_path, mime_type=None, data_file_name=None):
+    def add_bitstream(self, data_file_path, mime_type=None, data_file_name=None, description=None, primary=None,
+                      bundle=None, metadata=None):
         """
             Upload file located at data_file_path to item
         """
@@ -90,6 +91,15 @@ class item(object):
         if mime_type is not None:
             url += "&file_mime_type=%s" % mime_type
 
+        if description is not None:
+            url += '&description=%s' % description
+
+        if primary is not None:
+            url += '&primary=%s' % primary
+
+        if bundle is not None:
+            url += '&bundle_name=%s' % bundle
+
         with open(data_file_path, 'rb') as f:
             js = self._repository.api_post(url, json_data=None, data=f)
 
@@ -100,6 +110,9 @@ class item(object):
         logging.debug(
             'Bitstream id [%s] metadata\n%s', js['id'], pformat(js)
         )
+        if metadata:
+            logging.debug('Adding bitstream metadata\n' + pformat(metadata))
+            self._repository.api_post('/bitstreams/' + str(js['id']) + '/metadata', json_data=metadata, parse_json=False)
 
     def replace_metadata_field(self, json_metadata_entry_array):
         """
