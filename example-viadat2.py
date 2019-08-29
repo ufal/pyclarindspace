@@ -18,10 +18,21 @@ _logger = logging.getLogger()
 def xml_metadata_to_json(xml_path):
     document = etree.parse(os.path.expanduser(xml_path))
     schema = document.xpath('/dublin_core/@schema')[0]
-    return dict([('{}.{}.{}'.format(schema, child_el.get('element'), child_el.get('qualifier')) if
-             child_el.get('qualifier', '') != "none" else '{}.{}'.format(
-                schema, child_el.get('element')), child_el.text)
-             for child_el in document.findall('dcvalue')])
+    ret = dict()
+    for child_el in document.findall('dcvalue'):
+        key = '{}.{}.{}'.format(schema, child_el.get('element'), child_el.get('qualifier')) if \
+            child_el.get('qualifier', '') != "none" else '{}.{}'.format(schema,
+                                                                        child_el.get('element'))
+        if key in ret:
+            val = ret[key]
+            if isinstance(val, list):
+                val.append(child_el.text)
+            else:
+                values = [val, child_el.text]
+                ret[key] = values
+        else:
+            ret[key] = child_el.text
+    return ret
 
 
 def process_contents_file(contents_path):
@@ -32,6 +43,34 @@ def process_contents_file(contents_path):
             return [(os.path.join(contents_dir, row[0]), {el.split(':')[0]:el.split(':')[1] for el in row[1:]}) for row in contents]
     else:
         return []
+
+
+def _read_item_metadata(imports_dir, item_dir):
+    metadata = {}
+    for metadata_file in glob.glob(os.path.join(imports_dir, item_dir, '*.xml')):
+        _logger.debug("processing file {}".format(metadata_file))
+        file_name = os.path.basename(metadata_file)
+        if file_name == 'dublin_core.xml' or file_name.startswith(
+                'metadata_'):  # dublin_core.xml, metadata_*.xml
+            _logger.debug("reading metadata {}".format(metadata_file))
+            metadata.update(xml_metadata_to_json(metadata_file))
+    return metadata
+
+
+def _read_bitstream_metadata(file_path):
+    bitstream_metadata = {}
+    for metadata_file in glob.glob(os.path.join(imports_dir, item_dir,
+                                                os.path.basename(file_path) + '_*.xml')):
+        bitstream_metadata.update(xml_metadata_to_json(metadata_file))
+    return bitstream_metadata
+
+
+def _import_bitstreams(imports_dir, item_dir, item):
+    files_and_attrs = process_contents_file(os.path.join(imports_dir, item_dir, 'contents'))
+    for file_path, attrs in files_and_attrs:
+        bitstream_metadata = _read_bitstream_metadata(file_path)
+        item.add_bitstream(file_path, metadata=ViadatItem.metadata_convert(bitstream_metadata),
+                           **attrs)
 
 
 if __name__ == '__main__':
@@ -59,23 +98,11 @@ if __name__ == '__main__':
     interviews_md = {}
     for item_dir in [listed for listed in os.listdir(imports_dir) if os.path.isdir(
             os.path.join(imports_dir, listed))]:
-        metadata = {}
-        for metadata_file in glob.glob(os.path.join(imports_dir, item_dir, '*.xml')):
-            _logger.debug("processing file {}".format(metadata_file))
-            file_name = os.path.basename(metadata_file);
-            if file_name == 'dublin_core.xml' or file_name.startswith('metadata_'): # dublin_core.xml, metadata_*.xml
-                _logger.debug("reading metadata {}".format(metadata_file))
-                metadata.update(xml_metadata_to_json(metadata_file))
+        metadata = _read_item_metadata(imports_dir, item_dir)
         # _logger.debug(pformat(metadata))
         if metadata['dc.type'] == 'narrator':
             narrators[item_dir] = repository.create_narrator(metadata)
-            files_and_attrs = process_contents_file(os.path.join(imports_dir, item_dir, 'contents'))
-            for file_path, attrs in files_and_attrs:
-                    bitstream_metadata = {}
-                    for metadata_file in glob.glob(os.path.join(imports_dir, item_dir,
-                                                                os.path.basename(file_path) + '_*.xml')):
-                        bitstream_metadata.update(xml_metadata_to_json(metadata_file))
-                    narrators[item_dir].add_bitstream(file_path, metadata=ViadatItem.metadata_convert(bitstream_metadata), **attrs)
+            _import_bitstreams(imports_dir, item_dir, narrators[item_dir])
         elif metadata['dc.type'] == 'interview':
             interviews_md[item_dir] = metadata
         else:
@@ -88,13 +115,5 @@ if __name__ == '__main__':
                 narrator = narrators[narrator_dir]
                 for interview_dir in interview_dirs.split(','):
                     interview = narrator.create_interview(interviews_md[interview_dir])
-                    files_and_attrs = process_contents_file(os.path.join(imports_dir, interview_dir,
-                                                                        'contents'))
-                    for file_path, attrs in files_and_attrs:
-                        bitstream_metadata = {}
-                        for metadata_file in glob.glob(os.path.join(imports_dir, interview_dir,
-                                                                    os.path.basename(file_path) + '_*.xml')):
-                            bitstream_metadata.update(xml_metadata_to_json(metadata_file))
-                        interview.add_bitstream(file_path, metadata=ViadatItem.metadata_convert(bitstream_metadata), **attrs)
-
+                    _import_bitstreams(imports_dir, interview_dir, interview)
     repository.logout()

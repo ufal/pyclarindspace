@@ -54,8 +54,13 @@ class ViadatItem(item):
     @staticmethod
     def metadata_convert(metadata_dict):
         """Convert dict to expected key value array, we ignore lang"""
-        return [item.metadata(key, value) for key, value in metadata_dict.items()]
-
+        ret = []
+        for key, value in metadata_dict.items():
+            if isinstance(value, list):
+                ret += [item.metadata(key, val) for val in value]
+            else:
+                ret.append(item.metadata(key, value))
+        return ret
 
 class Interview(ViadatItem):
     md_fields = [{'name': key, 'required': True} for key in [
