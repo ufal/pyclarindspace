@@ -45,32 +45,31 @@ def process_contents_file(contents_path):
         return []
 
 
-def _read_item_metadata(imports_dir, item_dir):
-    metadata = {}
-    for metadata_file in glob.glob(os.path.join(imports_dir, item_dir, '*.xml')):
+def _read_item_metadata(imports_dir_, item_dir_):
+    metadata_ = {}
+    for metadata_file in glob.glob(os.path.join(imports_dir_, item_dir_, '*.xml')):
         _logger.debug("processing file {}".format(metadata_file))
         file_name = os.path.basename(metadata_file)
         if file_name == 'dublin_core.xml' or file_name.startswith(
                 'metadata_'):  # dublin_core.xml, metadata_*.xml
             _logger.debug("reading metadata {}".format(metadata_file))
-            metadata.update(xml_metadata_to_json(metadata_file))
-    return metadata
+            metadata_.update(xml_metadata_to_json(metadata_file))
+    return metadata_
 
 
-def _read_bitstream_metadata(file_path):
+def _read_bitstream_metadata(file_path_):
     bitstream_metadata = {}
-    for metadata_file in glob.glob(os.path.join(imports_dir, item_dir,
-                                                os.path.basename(file_path) + '_*.xml')):
+    for metadata_file in glob.glob(file_path_ + '_*.xml'):
         bitstream_metadata.update(xml_metadata_to_json(metadata_file))
     return bitstream_metadata
 
 
-def _import_bitstreams(imports_dir, item_dir, item):
-    files_and_attrs = process_contents_file(os.path.join(imports_dir, item_dir, 'contents'))
+def _import_bitstreams(imports_dir_, item_dir_, item_):
+    files_and_attrs = process_contents_file(os.path.join(imports_dir_, item_dir_, 'contents'))
     for file_path, attrs in files_and_attrs:
         bitstream_metadata = _read_bitstream_metadata(file_path)
-        item.add_bitstream(file_path, metadata=ViadatItem.metadata_convert(bitstream_metadata),
-                           **attrs)
+        item_.add_bitstream(file_path, metadata=ViadatItem.metadata_convert(bitstream_metadata),
+                            **attrs)
 
 
 if __name__ == '__main__':
