@@ -18,6 +18,6 @@ setup(
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
     ],
-    packages=['clarindspace', 'shortref'],
+    packages=['clarindspace', 'clarindspace.viadat', 'shortref'],
     install_requires=['requests', 'requests_toolbelt'],
 )
