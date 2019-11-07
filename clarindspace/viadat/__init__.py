@@ -106,6 +106,7 @@ class Narrator(ViadatItem):
 
     def create_interview(self, metadata_dict):
         metadata_dict['dc.relation.ispartof'] = 'http://hdl.handle.net/' + self.handle
+        metadata_dict['dc.type'] = 'interview'
         return Interview(metadata_dict, self.repository.interviews)
 
 
