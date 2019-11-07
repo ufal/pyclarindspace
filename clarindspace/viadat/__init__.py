@@ -15,16 +15,23 @@ _logger = logging.getLogger()
 
 class ViadatItem(item):
 
-    def __init__(self, metadata_dict, collection):
-        if not self.metadata_valid(self.__class__.md_fields, metadata_dict):
+    def __init__(self, metadata_dict, collection, from_item=None):
+        if metadata_dict and from_item:
+            raise ValueError('Either supply metadata_dict or from_item')
+
+        if metadata_dict and not self.metadata_valid(self.__class__.md_fields, metadata_dict):
             raise ValueError('Invalid metadata')
+
+        if from_item:
+            backing_item = from_item
         else:
             backing_item = collection.create_item(ViadatItem.metadata_convert(metadata_dict))
-            self._name = backing_item.name
-            self._id = backing_item.id
-            self._handle = backing_item.handle
-            self._owning_collection = collection
-            self._repository = backing_item._repository
+
+        self._name = backing_item.name
+        self._id = backing_item.id
+        self._handle = backing_item.handle
+        self._owning_collection = collection
+        self._repository = backing_item._repository
 
     @property
     def repository(self):
@@ -131,3 +138,7 @@ class ViadatRepo(repository):
             self._setup()
         metadata_dict['dc.type'] = 'narrator'
         return Narrator(metadata_dict, self.narrators)
+
+    def find_narrator(self, handle):
+        _narrator_item = self.find_item(handle)
+        return Narrator(None, None, from_item=_narrator_item)
