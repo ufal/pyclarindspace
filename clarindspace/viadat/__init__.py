@@ -141,5 +141,7 @@ class ViadatRepo(repository):
         return Narrator(metadata_dict, self.narrators)
 
     def find_narrator(self, handle):
+        if not self._inited:
+            self._setup()
         _narrator_item = self.find_item(handle)
         return Narrator(None, None, from_item=_narrator_item)
