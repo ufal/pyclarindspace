@@ -145,3 +145,9 @@ class ViadatRepo(repository):
             self._setup()
         _narrator_item = self.find_item(handle)
         return Narrator(None, None, from_item=_narrator_item)
+
+    def find_interview(self, handle):
+        if not self._inited:
+            self._setup()
+        _interview_item = self.find_item(handle)
+        return Interview(None, None, from_item=_interview_item)
